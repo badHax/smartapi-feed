@@ -1,11 +1,25 @@
 ## WebSocket
 import os
-from smartapi import WebSocket 
-FEED_TOKEN= os.environ[FEED_TOKEN]
-CLIENT_CODE=os.environ[CLIENT_CODE]
+from smartapi import WebSocket,SmartConnect
+
+apiKey = os.environ["SMART_API_KEY"]
+#create object of call
+obj=SmartConnect(api_key=apiKey)
+
+#login api call
+
+data = obj.generateSession(os.environ["SMART_API_CLIENT_ID"]),os.environ["SMART_API_CLIENT_PASSWORD"]))
+#refreshToken= data['data']['refreshToken']
+
+#fetch the feedtoken
+feedToken=obj.getfeedToken()
+
+#fetch User Profile
+#userProfile= obj.getProfile(refreshToken)
+
 token="nse_cm|2885&nse_cm|1594&nse_cm|11536"
 task="mw" #"mw"|"sfi"|"dp"
-ss = WebSocket(FEED_TOKEN, CLIENT_CODE)
+ss = WebSocket(feedToken, "R12345")
 
 def on_tick(ws, tick):
     print("Ticks: {}".format(tick))
