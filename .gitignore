@@ -1,3 +1,8 @@
+#user defined
+bank_index_file.txt
+nifty_index_file.txt
+finance_index_file.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

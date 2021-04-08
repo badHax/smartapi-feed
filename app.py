@@ -1,26 +1,51 @@
 ## WebSocket
 import os
+import sys
 from smartapi import WebSocket,SmartConnect
+from optionsDownloader import IndexOptionsDownloader
+from datetime import datetime
 
-apiKey = os.environ["SMART_API_KEY"]
+
+#credentials
+api_key = os.environ["SMART_API_KEY"]
+client_id = os.environ["SMART_API_CLIENT_ID"]
+client_password = os.environ["SMART_API_CLIENT_PASSWORD"]
+
 #create object of call
-obj=SmartConnect(api_key=apiKey)
+obj=SmartConnect(api_key=api_key)
 
 #login api call
-
-data = obj.generateSession(os.environ["SMART_API_CLIENT_ID"]),os.environ["SMART_API_CLIENT_PASSWORD"]))
-#refreshToken= data['data']['refreshToken']
+data = obj.generateSession(client_id,client_password)
 
 #fetch the feedtoken
 feedToken=obj.getfeedToken()
 
-#fetch User Profile
-#userProfile= obj.getProfile(refreshToken)
-
-token="nse_cm|2885&nse_cm|1594&nse_cm|11536"
+#web socket options
+token="nse_cm|3045" #&nse_cm|1594&nse_cm|11536"
 task="mw" #"mw"|"sfi"|"dp"
-ss = WebSocket(feedToken, "R12345")
+ss = WebSocket(feedToken, client_id)
 
+def main():
+    if data['message'] != 'SUCCESS':
+        print(data['message'])
+        sys.exit()
+    print("logged in to angelbroking successfully")
+    
+    #if today is a trading day (weekday)
+    if(datetime.today().weekday() < 5):
+        downloader = IndexOptionsDownloader(data)
+        
+        if(not downloader.is_valid_index_files()):
+            downloader.download_nse_options()
+            
+        # Assign the callbacks.
+        ss.on_ticks = on_tick
+        ss.on_connect = on_connect
+        ss.on_close = on_close
+        
+        print("*** starting live feed ***")
+        ss.connect()
+    
 def on_tick(ws, tick):
     print("Ticks: {}".format(tick))
 
@@ -31,9 +56,5 @@ def on_connect(ws, response):
 def on_close(ws, code, reason):
     ws.stop()
 
-# Assign the callbacks.
-ss.on_ticks = on_tick
-ss.on_connect = on_connect
-ss.on_close = on_close
-
-ss.connect( )
+if __name__ == "__main__":
+    main()
