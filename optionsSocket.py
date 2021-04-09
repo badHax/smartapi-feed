@@ -45,7 +45,6 @@ def on_tick(ws, tick):
     global start
     global end
     global interval
-    
     print("Ticks: {}".format(tick))
     for i in tick:
         if 'ak' in i.keys() or 'tvalue' in i.keys():
