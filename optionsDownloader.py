@@ -13,9 +13,9 @@ import pytz
      were added or removed from the exchange
 '''
 class IndexOptionsDownloader:
-    nifty_index_file = "FINNIFTY.txt"
+    nifty_index_file = "NIFTY.txt"
     bank_index_file = "BANKNIFTY.txt"
-    finance_index_file = "NIFTY.txt"
+    finance_index_file = "FINNIFTY.txt"
     private_key = os.environ['SMART_API_KEY']
     exchange_name = 'nse_fo'
     
