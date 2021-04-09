@@ -17,8 +17,8 @@ class GoogleSheetsUtil:
     # The ID and range of a sample spreadsheet.
     SPREADSHEET_ID = os.environ['SPREADSHEET_ID']
     MAJOR_RANGE_START = 'A'
-    MAJOR_RANGE_END = 'U'
-    SPREADSHEET_RANGE = MAJOR_RANGE_START+'3:'+ MAJOR_RANGE_END +'1000'
+    MAJOR_RANGE_END = 'AH'
+    SPREADSHEET_RANGE = MAJOR_RANGE_START+'2:'+ MAJOR_RANGE_END +'1000'
 
     def __init__(self):
         creds = None
@@ -34,14 +34,14 @@ class GoogleSheetsUtil:
 
         self.__service =  build('sheets', 'v4', credentials=creds)
         
-    def add_row_range(self, row_values, spreadsheet_name):
+    def add_row_range(self, row_values, spreadsheet_name, row_num):
         batch_update_values_request_body = {
                   "valueInputOption": "USER_ENTERED",
                   "includeValuesInResponse": False,
                   "data": [
                     {
                       "majorDimension": "ROWS",
-                      "range": spreadsheet_name.name +'!'+ self.MAJOR_RANGE_START+"3:"+ self.MAJOR_RANGE_END + str(len(row_values)),
+                      "range": '{0}!{1}{2}:{3}{4}'.format(spreadsheet_name,self.MAJOR_RANGE_START,row_num,self.MAJOR_RANGE_END,str(len(row_values))),
                       "values": row_values
                     }
                   ]

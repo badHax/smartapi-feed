@@ -13,11 +13,12 @@ import pytz
      were added or removed from the exchange
 '''
 class IndexOptionsDownloader:
-    nifty_index_file = "NIFTY.txt"
-    bank_index_file = "BANKNIFTY.txt"
-    finance_index_file = "FINNIFTY.txt"
+    nifty_index_file = "NIFTY"
+    bank_index_file = "BANKNIFTY"
+    finance_index_file = "FINNIFTY"
     private_key = os.environ['SMART_API_KEY']
     exchange_name = 'nse_fo'
+    max_token_per_file = 450
     
     try:
         clientPublicIp= " " + get('https://api.ipify.org').text
@@ -66,23 +67,56 @@ class IndexOptionsDownloader:
      
     def __save_json_files(self,jsonObj):
         nifty_data = []
-        bank_data = []
-        finance_data = []
-        with open(self.nifty_index_file,'w') as niftyOutFile, open(self.bank_index_file,'w') as bankOutFile, open(self.finance_index_file,'w') as financeOutFile:
-            for instrumnet in jsonObj:
-                if instrumnet['instrumenttype'] == 'OPTIDX': # index option
-                    if instrumnet['name'] == 'NIFTY':
-                        nifty_data.append(instrumnet)
-                    if instrumnet['name'] == 'FINNIFTY':
-                        finance_data.append(instrumnet)    
-                    if instrumnet['name'] == 'BANKNIFTY':
-                        bank_data.append(instrumnet)
-            print('saving {0}'.format(self.nifty_index_file))
-            json.dump(nifty_data,niftyOutFile)
-            print('saving {0}'.format(self.bank_index_file))
-            json.dump(bank_data,bankOutFile)
-            print('saving {0}'.format(self.finance_index_file))
-            json.dump(finance_data,financeOutFile)
+        nifty_data_count = 0
+        bank_nifty_data = []
+        bank_nifty_data_count = 0
+        fin_nifty_data = []
+        fin_nifty_data_count = 0
+        for instrumnet in jsonObj:
+            if instrumnet['instrumenttype'] == 'OPTIDX': # index option
+                if instrumnet['name'] == 'NIFTY':
+                    if len(nifty_data) <= self.max_token_per_file:
+                        nifty_data.append(instrumnet['token'])
+                    else:
+                        with open('{0}_{1}.txt'.format(self.nifty_index_file,nifty_data_count),'w') as niftyOutFile:
+                            print('saving {0}'.format(niftyOutFile.name))
+                            json.dump(nifty_data,niftyOutFile)
+                            nifty_data = []
+                            nifty_data_count += 1
+                if instrumnet['name'] == 'BANKNIFTY':
+                    if len(bank_nifty_data) <= self.max_token_per_file:
+                        bank_nifty_data.append(instrumnet['token'])
+                    else:
+                        with open('{0}_{1}.txt'.format(self.bank_index_file,bank_nifty_data_count),'w') as niftyOutFile:
+                            print('saving {0}'.format(niftyOutFile.name))
+                            json.dump(bank_nifty_data,niftyOutFile)
+                            bank_nifty_data = []
+                            bank_nifty_data_count += 1
+                            
+                if instrumnet['name'] == 'FINNIFTY':
+                    if len(fin_nifty_data) <= self.max_token_per_file:
+                        fin_nifty_data.append(instrumnet['token'])
+                    else:
+                        with open('{0}_{1}.txt'.format(self.finance_index_file,fin_nifty_data_count),'w') as niftyOutFile:
+                            print('saving {0}'.format(niftyOutFile.name))
+                            json.dump(fin_nifty_data,niftyOutFile)
+                            fin_nifty_data = []
+                            fin_nifty_data_count += 1
+        
+        # finally save remaining files       
+        if  len(nifty_data) > 0:
+            with open('{0}_{1}.txt'.format(self.nifty_index_file,nifty_data_count),'w') as niftyOutFile:
+                print('saving {0}'.format(niftyOutFile.name))
+                json.dump(nifty_data,niftyOutFile)
+        if  len(nifty_data) > 0:
+            with open('{0}_{1}.txt'.format(self.bank_index_file,bank_nifty_data_count),'w') as niftyOutFile:
+                print('saving {0}'.format(niftyOutFile.name))
+                json.dump(bank_nifty_data,niftyOutFile)
+        if  len(nifty_data) > 0:
+            with open('{0}_{1}.txt'.format(self.finance_index_file,fin_nifty_data_count),'w') as niftyOutFile:
+                print('saving {0}'.format(niftyOutFile.name))
+                json.dump(fin_nifty_data,niftyOutFile)
+
                 
     ''' 
         check if the option symbols were updated already for the day
@@ -92,17 +126,14 @@ class IndexOptionsDownloader:
         try:
             tz = pytz.timezone('Asia/Kolkata')
             today = datetime.now().astimezone(tz).strftime('%x');
+            
             # last date modifeid time
-            d1 = datetime.utcfromtimestamp(os.path.getmtime(self.nifty_index_file)).astimezone(tz).strftime('%x')
-            d2 = datetime.utcfromtimestamp(os.path.getmtime(self.bank_index_file)).astimezone(tz).strftime('%x')
-            d3 = datetime.utcfromtimestamp(os.path.getmtime(self.finance_index_file)).astimezone(tz).strftime('%x')
+            d1 = datetime.utcfromtimestamp(os.path.getmtime(self.nifty_index_file+'_0.txt')).astimezone(tz).strftime('%x')
             
             # size of file
-            s1 = os.path.getsize(self.nifty_index_file)
-            s2 = os.path.getsize(self.bank_index_file)
-            s3 = os.path.getsize(self.finance_index_file)
+            s1 = os.path.getsize(self.nifty_index_file+'_0.txt')
               
-            if (today == d1 and today == d2 and today == d3) and (s1 > 0 and s2 > 0 and s3 > 0):
+            if (today == d1) and (s1 > 0):
                 print("options list already downloaded for today...")
                 return True
             print ("options file is outdated")

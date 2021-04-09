@@ -36,9 +36,24 @@ def main():
         if(not downloader.is_valid_index_files()):
             downloader.download_nse_options()
         
-        _thread.start_new_thread(os.system,('python optionsSocket.py {0} {1} {2}'.format(feedToken,client_id, SheetName.NIFTY.name),))
-        _thread.start_new_thread(os.system,('python optionsSocket.py {0} {1} {2}'.format(feedToken,client_id, SheetName.BANKNIFTY.name),))
+        nifty_files = []
+        bank_files = []
+        for root, dirs, files in os.walk('.'):
+            for filename in files:
+                if filename.startswith(SheetName.NIFTY.name):
+                    nifty_files.append(filename)
+                if filename.startswith(SheetName.BANKNIFTY.name):
+                    bank_files.append(filename)
         
+        c1 = 0
+        for filename in nifty_files:     
+            _thread.start_new_thread(os.system,('python optionsSocket.py {0} {1} {2} {3}'.format(feedToken,client_id, filename, c1),))
+            c1 += 1
+        c2 = 0
+        for filename in bank_files:
+            _thread.start_new_thread(os.system,('python optionsSocket.py {0} {1} {2} {3}'.format(feedToken,client_id, filename, c2),))
+            c2 += 1
+            
         while 1:
             pass
         

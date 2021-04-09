@@ -1,7 +1,7 @@
 #user defined
-NIFTY.txt
-BANKNIFTY.txt
-FINNIFTY.txt
+NIFTY*.txt
+BANKNIFTY*.txt
+FINNIFTY*.txt
 secret.json
 
 # Byte-compiled / optimized / DLL files

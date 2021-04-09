@@ -6,19 +6,28 @@ from smartapi import WebSocket,SmartConnect
 from optionsDownloader import IndexOptionsDownloader
 from googleSheetsUtil import GoogleSheetsUtil, SheetName
 from datetime import datetime
+from timeit import default_timer as timer
+import ast
 
 task = ''
 token = ''
 sheetName = ''
+interval = 20
+start = -10
+end = interval
+row_num = 0
 
 def main():
     global task
     global token
     global sheetName
+    global start
+    global row_num
     
     feedToken = sys.argv[1]
     client_id = sys.argv[2]
     sheetName = sys.argv[3]
+    row_num = sys.argv[4]
     
     task = "mw"
     token = get_token_string(sheetName)
@@ -33,13 +42,22 @@ def main():
     ss.connect()
         
 def on_tick(ws, tick):
+    global start
+    global end
+    global interval
+    
     print("Ticks: {}".format(tick))
-    if "ltt" in tick[0]:
-        row = get_row_data(tick)
-        print("appending row to {0} \n {1}".format(sheetName, row))
-        sheetUtil = GoogleSheetsUtil()
-        sheetUtil.add_row_range(row, sheetName)
-        
+    for i in tick:
+        if 'ak' in i.keys() or 'tvalue' in i.keys():
+            continue
+        if i['name'] == 'sf' and 'ltp' in i.keys():
+            if end - start >= interval:
+                row = get_row_data(tick)
+                sheetUtil = GoogleSheetsUtil()
+                sheetUtil.add_row_range(row, sheetName.split('_')[0],row_num)
+                start = timer()
+            end = timer()
+    
 def on_connect(ws, response):
     ws.websocket_connection() # Websocket connection 
     ws.send_request(token,task) 
@@ -51,38 +69,52 @@ def get_row_data(tick):
     output = []
     for option in tick:
         row_data = []
-        row_data.append(0)  #   open interest 
-        row_data.append(0)  #   change in open interest
-        row_data.append(0)  #   volume
-        row_data.append(0)  #   implied volititlity
-        row_data.append(0)  #   last trade price
-        row_data.append(0)  #   change
-        row_data.append(0)  #   bid quantity
-        row_data.append(0)  #   bid price
-        row_data.append(0)  #   bid price
-        row_data.append(0)  #   ask price
-        row_data.append(0)  #   strike price
-        row_data.append(0)  #   bid quantity
-        row_data.append(0)  #   bid price
-        row_data.append(0)  #   ask price
-        row_data.append(0)  #   ask quantity
-        row_data.append(0)  #   last trade price put
-        row_data.append(0)  #   implied volititlity put
-        row_data.append(0)  #   volume put
-        row_data.append(0)  #   change in oi put
-        row_data.append(0)  #   oi put
+        row_data.append(options['name'] if 'name' in options.keys() else '-')  
+        row_data.append(options['tk'] if 'tk' in options.keys() else '-')  
+        row_data.append(options['e'] if 'e' in options.keys() else '-')  
+        row_data.append(options['ltp'] if 'ltp' in options.keys() else '-')  
+        row_data.append(options['c'] if 'c' in options.keys() else '-')  
+        row_data.append(options['nc'] if 'nc' in options.keys() else '-')  
+        row_data.append(options['cng'] if 'cng' in options.keys() else '-')  
+        row_data.append(options['v'] if 'v' in options.keys() else '-') 
+        row_data.append(options['bq'] if 'bq' in options.keys() else '-')  
+        row_data.append(options['bp'] if 'bp' in options.keys() else '-')  
+        row_data.append(options['bs'] if 'bs' in options.keys() else '-')  
+        row_data.append(options['sp'] if 'sp' in options.keys() else '-')  
+        row_data.append(options['ltq'] if 'ltq' in options.keys() else '-') 
+        row_data.append(options['ltt'] if 'ltt' in options.keys() else '-')
+        row_data.append(options['ucl'] if 'ucl' in options.keys() else '-') 
+        row_data.append(options['tbq'] if 'tbq' in options.keys() else '-') 
+        row_data.append(options['mc'] if 'mc' in options.keys() else '-') 
+        row_data.append(options['lo'] if 'lo' in options.keys() else '-')
+        row_data.append(options['yh'] if 'yh' in options.keys() else '-')
+        row_data.append(options['op'] if 'op' in options.keys() else '-')
+        row_data.append(options['ts'] if 'ts' in options.keys() else '-')
+        row_data.append(options['h'] if 'h' in options.keys() else '-')
+        row_data.append(options['lcl'] if 'lcl' in options.keys() else '-')
+        row_data.append(options['tsq'] if 'tsq' in options.keys() else '-')
+        row_data.append(options['ap'] if 'ap' in options.keys() else '-')
+        row_data.append(options['yl'] if 'yl' in options.keys() else '-')
+        row_data.append(options['h'] if 'h' in options.keys() else '-')
+        row_data.append(options['oi'] if 'oi' in options.keys() else '-')
+        row_data.append(options['idsc'] if 'idsc' in options.keys() else '-')
+        row_data.append(options['to'] if 'to' in options.keys() else '-')
+        row_data.append(options['toi'] if 'toi' in options.keys() else '-')
+        row_data.append(options['lter'] if 'lter' in options.keys() else '-')
+        row_data.append(options['hter'] if 'hter' in options.keys() else '-')
+        row_data.append(options['setltyp'] if 'setltyp' in options.keys() else '-')
         output.append(row_data)
     return output
 
 def get_token_string(filename):
         output = ''
-        with open(filename + ".txt", 'r') as filereader:
+        with open(filename, 'r') as filereader:
             strData = filereader.read()
-            jsonObj = json.loads(strData)
-            for instrument in jsonObj:
+            token_list = ast.literal_eval(strData)
+            for tk in token_list:
                 if len(output) > 1:
                     output += '&'
-                output += "nse_fo|" + instrument['token']
+                output += "nse_fo|" + tk
         return output
         
 if __name__ == "__main__":
