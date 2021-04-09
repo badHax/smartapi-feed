@@ -6,16 +6,18 @@ import sys
 import re, uuid
 from requests import get
 from datetime import datetime
+import pytz
 
 ''' 
     We update the options intrumnet list daily in case options
      were added or removed from the exchange
 '''
 class IndexOptionsDownloader:
-    nifty_index_file = "nifty_index_file.txt"
-    bank_index_file = "bank_index_file.txt"
-    finance_index_file = "finance_index_file.txt"
+    nifty_index_file = "FINNIFTY.txt"
+    bank_index_file = "BANKNIFTY.txt"
+    finance_index_file = "NIFTY.txt"
     private_key = os.environ['SMART_API_KEY']
+    exchange_name = 'nse_fo'
     
     try:
         clientPublicIp= " " + get('https://api.ipify.org').text
@@ -61,7 +63,7 @@ class IndexOptionsDownloader:
         else:
             print("failed to download daily index options list")
             sys.exit()
-            
+     
     def __save_json_files(self,jsonObj):
         nifty_data = []
         bank_data = []
@@ -88,11 +90,12 @@ class IndexOptionsDownloader:
     '''            
     def is_valid_index_files(self):
         try:
-            today = datetime.now().strftime('%x');
+            tz = pytz.timezone('Asia/Kolkata')
+            today = datetime.now().astimezone(tz).strftime('%x');
             # last date modifeid time
-            d1 = datetime.utcfromtimestamp(os.path.getmtime(self.nifty_index_file)).strftime('%x')
-            d2 = datetime.utcfromtimestamp(os.path.getmtime(self.bank_index_file)).strftime('%x')
-            d3 = datetime.utcfromtimestamp(os.path.getmtime(self.finance_index_file)).strftime('%x')
+            d1 = datetime.utcfromtimestamp(os.path.getmtime(self.nifty_index_file)).astimezone(tz).strftime('%x')
+            d2 = datetime.utcfromtimestamp(os.path.getmtime(self.bank_index_file)).astimezone(tz).strftime('%x')
+            d3 = datetime.utcfromtimestamp(os.path.getmtime(self.finance_index_file)).astimezone(tz).strftime('%x')
             
             # size of file
             s1 = os.path.getsize(self.nifty_index_file)
