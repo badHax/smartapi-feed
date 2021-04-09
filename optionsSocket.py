@@ -2,7 +2,7 @@
 import os
 import sys
 import json
-from smartapi import WebSocket,SmartConnect
+from smartapi import WebSocket
 from optionsDownloader import IndexOptionsDownloader
 from googleSheetsUtil import GoogleSheetsUtil, SheetName
 from datetime import datetime
