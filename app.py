@@ -19,7 +19,7 @@ client_id = os.environ["SMART_API_CLIENT_ID"]
 client_password = os.environ["SMART_API_CLIENT_PASSWORD"]
 
 #create object of call
-obj=SmartConnect(api_key=api_key)
+obj=SmartConnect(api_key=api_key,disable_ssl=True)
 
 #login api call
 data = obj.generateSession(client_id,client_password)
@@ -53,7 +53,7 @@ def refresh():
 def hello():
     try:
         #if today is a trading day (weekday)
-        if(datetime.today().weekday() < 5):
+        if(datetime.today().weekday() >= 5):
             download_files()
             
             nifty_files = []
@@ -67,6 +67,7 @@ def hello():
 
             c1 = 0
             for filename in nifty_files:
+                print('python optionsSocket.py {0} {1} {2} {3}'.format(feedToken,client_id, filename, c1))
                 not_done.append(executor.submit(os.system,'python optionsSocket.py {0} {1} {2} {3}'.format(feedToken,client_id, filename, c1)))
                 c1 += 1
             c2 = 0
@@ -74,7 +75,9 @@ def hello():
                 not_done.append(executor.submit(os.system,'python optionsSocket.py {0} {1} {2} {3}'.format(feedToken,client_id, filename, c2)))
                 c2 += 1
                 
-        return "I'm alive!"
+            return "I'm alive!"
+        else:
+            return "Sorry I don't work on weekends"
     except Exception as ex:
         print(ex)
         return 'failed to start, try /refresh first'

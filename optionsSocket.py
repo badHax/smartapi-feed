@@ -6,7 +6,7 @@ from smartapi import WebSocket
 from optionsDownloader import IndexOptionsDownloader
 from googleSheetsUtil import GoogleSheetsUtil, SheetName
 from datetime import datetime
-from timeit import default_timer as timer
+import time
 import ast
 import logging 
 
@@ -16,10 +16,8 @@ logger.setLevel(logging.DEBUG)
 task = ''
 token = ''
 sheetName = ''
-interval = 20
-start = -10
-end = interval
-row_num = 0
+interval = 300 # every 5 minutes
+last_checked = time.perf_counter() - interval
 
 def main():
     global task
@@ -42,24 +40,21 @@ def main():
     ss.on_connect = on_connect
     ss.on_close = on_close
     
-    logger.info("*** starting live feed {0} ***".format(sheetName))
+    logger.error("*** starting live feed {0} ***".format(sheetName))
     ss.connect()
         
 def on_tick(ws, tick):
-    global start
-    global end
-    global interval
-    logger.info("Ticks: {}".format(tick))
+    global last_checked
     for i in tick:
         if 'ak' in i.keys() or 'tvalue' in i.keys():
+            logger.error("Ticks: {}".format(tick))
             continue
-        if i['name'] == 'sf' and 'ltp' in i.keys():
-            if end - start >= interval:
-                row = get_row_data(tick)
+        if 'ltp' in i.keys():
+            if(time.perf_counter() - last_checked >= interval):
+                logger.error("Tick: {}".format(i))
+                row = get_row_data(i)
                 sheetUtil = GoogleSheetsUtil()
                 sheetUtil.add_row_range(row, sheetName.split('_')[0],row_num)
-                start = timer()
-            end = timer()
     
 def on_connect(ws, response):
     ws.websocket_connection() # Websocket connection 
@@ -68,46 +63,43 @@ def on_connect(ws, response):
 def on_close(ws, code, reason):
     ws.stop()
 
-def get_row_data(tick):
-    output = []
-    for option in tick:
-        row_data = []
-        row_data.append(options['name'] if 'name' in options.keys() else '-')  
-        row_data.append(options['tk'] if 'tk' in options.keys() else '-')  
-        row_data.append(options['e'] if 'e' in options.keys() else '-')  
-        row_data.append(options['ltp'] if 'ltp' in options.keys() else '-')  
-        row_data.append(options['c'] if 'c' in options.keys() else '-')  
-        row_data.append(options['nc'] if 'nc' in options.keys() else '-')  
-        row_data.append(options['cng'] if 'cng' in options.keys() else '-')  
-        row_data.append(options['v'] if 'v' in options.keys() else '-') 
-        row_data.append(options['bq'] if 'bq' in options.keys() else '-')  
-        row_data.append(options['bp'] if 'bp' in options.keys() else '-')  
-        row_data.append(options['bs'] if 'bs' in options.keys() else '-')  
-        row_data.append(options['sp'] if 'sp' in options.keys() else '-')  
-        row_data.append(options['ltq'] if 'ltq' in options.keys() else '-') 
-        row_data.append(options['ltt'] if 'ltt' in options.keys() else '-')
-        row_data.append(options['ucl'] if 'ucl' in options.keys() else '-') 
-        row_data.append(options['tbq'] if 'tbq' in options.keys() else '-') 
-        row_data.append(options['mc'] if 'mc' in options.keys() else '-') 
-        row_data.append(options['lo'] if 'lo' in options.keys() else '-')
-        row_data.append(options['yh'] if 'yh' in options.keys() else '-')
-        row_data.append(options['op'] if 'op' in options.keys() else '-')
-        row_data.append(options['ts'] if 'ts' in options.keys() else '-')
-        row_data.append(options['h'] if 'h' in options.keys() else '-')
-        row_data.append(options['lcl'] if 'lcl' in options.keys() else '-')
-        row_data.append(options['tsq'] if 'tsq' in options.keys() else '-')
-        row_data.append(options['ap'] if 'ap' in options.keys() else '-')
-        row_data.append(options['yl'] if 'yl' in options.keys() else '-')
-        row_data.append(options['h'] if 'h' in options.keys() else '-')
-        row_data.append(options['oi'] if 'oi' in options.keys() else '-')
-        row_data.append(options['idsc'] if 'idsc' in options.keys() else '-')
-        row_data.append(options['to'] if 'to' in options.keys() else '-')
-        row_data.append(options['toi'] if 'toi' in options.keys() else '-')
-        row_data.append(options['lter'] if 'lter' in options.keys() else '-')
-        row_data.append(options['hter'] if 'hter' in options.keys() else '-')
-        row_data.append(options['setltyp'] if 'setltyp' in options.keys() else '-')
-        output.append(row_data)
-    return output
+def get_row_data(options):
+    row_data = []
+    row_data.append('-' if 'name' not in options.keys() else options['name'])  
+    row_data.append('-' if 'tk' not in options.keys() else options['tk'] )   
+    row_data.append('-' if 'e' not in options.keys() else options['e'] )   
+    row_data.append('-' if 'ltp' not in options.keys() else options['ltp'] )   
+    row_data.append('-' if 'c' not in options.keys() else options['c'] )   
+    row_data.append('-' if 'nc' not in options.keys() else options['nc'] )   
+    row_data.append('-' if 'cng' not in options.keys() else options['cng'] )   
+    row_data.append('-' if 'v' not in options.keys() else options['v'] )  
+    row_data.append('-' if 'bq' not in options.keys() else options['bq'] )   
+    row_data.append('-' if 'bp' not in options.keys() else options['bp'] )   
+    row_data.append('-' if 'bs' not in options.keys() else options['bs'] )   
+    row_data.append('-' if 'sp' not in options.keys() else options['sp'] )   
+    row_data.append('-' if 'ltq' not in options.keys() else options['ltq'] )  
+    row_data.append('-' if 'ltt' not in options.keys() else options['ltt'] ) 
+    row_data.append('-' if 'ucl' not in options.keys() else options['ucl'] )  
+    row_data.append('-' if 'tbq' not in options.keys() else options['tbq'] )  
+    row_data.append('-' if 'mc' not in options.keys() else options['mc'] )  
+    row_data.append('-' if 'lo' not in options.keys() else options['lo'] ) 
+    row_data.append('-' if 'yh' not in options.keys() else options['yh'] ) 
+    row_data.append('-' if 'op' not in options.keys() else options['op'] ) 
+    row_data.append('-' if 'ts' not in options.keys() else options['ts'] ) 
+    row_data.append('-' if 'h' not in options.keys() else options['h'] ) 
+    row_data.append('-' if 'lcl' not in options.keys() else options['lcl'] ) 
+    row_data.append('-' if 'tsq' not in options.keys() else options['tsq'] ) 
+    row_data.append('-' if 'ap' not in options.keys() else options['ap'] ) 
+    row_data.append('-' if 'yl' not in options.keys() else options['yl'] ) 
+    row_data.append('-' if 'h' not in options.keys() else options['h'] ) 
+    row_data.append('-' if 'oi' not in options.keys() else options['oi'] ) 
+    row_data.append('-' if 'idsc' not in options.keys() else options['idsc'] ) 
+    row_data.append('-' if 'to' not in options.keys() else options['to'] ) 
+    row_data.append('-' if 'toi' not in options.keys() else options['toi'] ) 
+    row_data.append('-' if 'lter' not in options.keys() else options['lter'] ) 
+    row_data.append('-' if 'hter' not in options.keys() else options['hter'] ) 
+    row_data.append('-' if 'setltyp' not in options.keys() else options['setltyp'] ) 
+    return row_data
 
 def get_token_string(filename):
         output = ''

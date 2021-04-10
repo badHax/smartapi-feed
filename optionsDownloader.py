@@ -128,7 +128,7 @@ class IndexOptionsDownloader:
             today = datetime.now().astimezone(tz).strftime('%x');
             
             # last date modifeid time
-            d1 = datetime.utcfromtimestamp(os.path.getmtime(self.nifty_index_file+'_0.txt')).astimezone(tz).strftime('%x')
+            d1 = datetime.fromtimestamp(os.path.getmtime(self.nifty_index_file+'_0.txt')).astimezone(tz).strftime('%x')
             
             # size of file
             s1 = os.path.getsize(self.nifty_index_file+'_0.txt')
