@@ -39,7 +39,7 @@ setx SMART_API_CLIENT_ID <angel broking client id>
 setx SMART_API_CLIENT_PASSWORD <angel broking client password>
 setx SMART_API_KEY <api key from smart api>
 setx SPREADSHEET_ID <google spreadsheet id>
-setx PORT <port number>
+setx PORT 8080
 
 ```
 
@@ -48,3 +48,11 @@ Then run
 ```bash
 python app.py
 ```
+
+The application will start running on the server. For eample if the server is your local machine (127.0.0.1) you can control it with the following urls
+- start the websockets http://127.0.0.1:8080/start
+- see the status the websockets http://127.0.0.1:8080/status
+- stop the websockets http://127.0.0.1:8080/stop
+- refresh the login for angel broking (daily) http://127.0.0.1:8080/refresh
+
+
