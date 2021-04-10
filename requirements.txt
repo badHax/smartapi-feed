@@ -5,3 +5,4 @@ autobahn==21.3.1
 google-api-python-client==2.1.0
 google-auth-oauthlib==0.4.4
 service-identity==18.1.0
+flask==1.1.2

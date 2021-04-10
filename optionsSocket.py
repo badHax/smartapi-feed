@@ -8,7 +8,11 @@ from googleSheetsUtil import GoogleSheetsUtil, SheetName
 from datetime import datetime
 from timeit import default_timer as timer
 import ast
+import logging 
 
+logger = logging.getLogger('websockets')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
 task = ''
 token = ''
 sheetName = ''
@@ -37,7 +41,8 @@ def main():
     ss.on_ticks = on_tick
     ss.on_connect = on_connect
     ss.on_close = on_close
-        
+    
+    print(ss)
     print("*** starting live feed {0} ***".format(sheetName))
     ss.connect()
         
@@ -116,5 +121,5 @@ def get_token_string(filename):
                 output += "nse_fo|" + tk
         return output
         
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
