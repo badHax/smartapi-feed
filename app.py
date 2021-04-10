@@ -53,7 +53,7 @@ def refresh():
 def hello():
     try:
         #if today is a trading day (weekday)
-        if(datetime.today().weekday() >= 5):
+        if(datetime.today().weekday() < 5):
             download_files()
             
             nifty_files = []
