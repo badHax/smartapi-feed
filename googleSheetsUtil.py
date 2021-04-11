@@ -39,7 +39,7 @@ class GoogleSheetsUtil:
                   "data": [
                     {
                       "majorDimension": "ROWS",
-                      "range": '{0}!{1}{2}:{3}{4}'.format(spreadsheet_name,self.MAJOR_RANGE_START,row_num,self.MAJOR_RANGE_END,str(len(row_values))),
+                      "range": '{0}!{1}{2}:{3}{4}'.format(spreadsheet_name,self.MAJOR_RANGE_START,row_num,self.MAJOR_RANGE_END,str(len(row_values)+ row_num)),
                       "values": row_values
                     }
                   ]

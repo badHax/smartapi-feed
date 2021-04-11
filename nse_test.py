@@ -4,24 +4,18 @@ import sys
 import time
 from googleSheetsUtil import GoogleSheetsUtil
 
-api_endpoint = 'https://www.nseindia.com/api/option-chain-indices'
+api_endpoint = 'https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY'
 webpage = 'https://www.nseindia.com/get-quotes/derivatives?symbol=NIFTY'
 
 def job():
-	headers = {
-		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'
-	}
-
-	params = (
-		('symbol', 'NIFTY'),
-	)
-	r1 = requests.get(webpage, headers=headers, verify=False)
-	headers['Cookie'] = r1.headers['Set-Cookie']
+	print("updating sheet")
+	headers = {'User-Agent': 'python/script'}
+	s = requests.session()
+	r1 = s.get(webpage, headers=headers)
+	response = s.get(api_endpoint, headers=headers)
 	
-	response = requests.get(api_endpoint, headers=headers, params=params, verify=False)
-
 	if response.status_code == 400:
-		response = requests.get(api_endpoint, headers=headers, params=params, verify=False)
+		response = s.get(api_endpoint)
 	
 	j = response.json()
 	
@@ -40,12 +34,17 @@ def job():
 			data['PE']['pchangeinOpenInterest']
 			]
 		all_data.append(row_data)
-		
+			
 	gs = GoogleSheetsUtil(sys.argv[2])
-	gs.add_row_range(all_data, 'NIFTY',0)
+	gs.add_row_range(all_data, 'NIFTY',2)
+	print("next update in {0} minutes".format(sys.argv[1]))
 	
 
 if(len(sys.argv) < 3):
 	print('useage: nse_test.py interval_in_minutes google_sheet_id')
 else:
 	job()
+	schedule.every(int(sys.argv[1])).minutes.do(job)
+	while True:
+		schedule.run_pending()
+		time.sleep(1)
