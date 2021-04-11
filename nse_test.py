@@ -4,16 +4,16 @@ import sys
 import time
 from googleSheetsUtil import GoogleSheetsUtil
 
-api_endpoint = 'https://www.nseindia.com/api/option-chain-indices'
+api_endpoint = 'https://www.nseindia.com/api/option-chain-'
 webpage = 'https://www.nseindia.com/get-quotes/derivatives'
 
-def get_symbol(name):
+def get_symbol(name,instrument='indices'):
 	print('updating {0} sheet...'.format(name))
 	headers = {'User-Agent': 'python/script'}
 	params = {('symbol',name)}
 	s = requests.session()
 	r1 = s.get(webpage, headers=headers,params=params)
-	response = s.get(api_endpoint, headers=headers, params=params)
+	response = s.get(api_endpoint+instrument, headers=headers, params=params)
 	
 	if response.status_code == 400:
 		response = s.get(api_endpoint)
@@ -43,7 +43,7 @@ def job():
 	while True:
 		get_symbol('NIFTY')
 		get_symbol('BANKNIFTY')
-		get_symbol('RELIANCE')
+		get_symbol('RELIANCE','equities')
 		time.sleep(int(sys.argv[1])*60)
 		
 if(len(sys.argv) < 3):
