@@ -42,11 +42,11 @@ def get_symbol(name,instrument='indices'):
 	print("next update in {0} minutes".format(sys.argv[1]))
 	
 	
-def job():
+def job(force=False):
 	while True:
 		now = datetime.datetime.now()
 		end = now.replace(hour=13,minute=30,second=0,microsecond=0)
-		if now < end:
+		if now < end or force:
 			get_symbol('NIFTY')
 			get_symbol('BANKNIFTY')
 			get_symbol('RELIANCE','equities')
@@ -57,7 +57,7 @@ def job():
 if(len(sys.argv) < 3):
 	print('useage: nse_test.py interval_in_minutes google_sheet_id')
 else:
-	job()
+	job(force=True)
 	schedule.every().monday.at('09:00').do(job)
 	schedule.every().tuesday.at('09:00').do(job)
 	schedule.every().wednesday.at('09:00').do(job)
