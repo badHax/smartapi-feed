@@ -13,14 +13,12 @@ class SheetName(Enum):
 class GoogleSheetsUtil:
     # If modifying these scopes, delete the file token.json.
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets','https://www.googleapis.com/auth/drive','https://www.googleapis.com/auth/drive.file']
-
-    # The ID and range of a sample spreadsheet.
-    SPREADSHEET_ID = os.environ['SPREADSHEET_ID']
     MAJOR_RANGE_START = 'A'
-    MAJOR_RANGE_END = 'AH'
+    MAJOR_RANGE_END = 'K'
     SPREADSHEET_RANGE = MAJOR_RANGE_START+'2:'+ MAJOR_RANGE_END +'1000'
 
-    def __init__(self):
+    def __init__(self,id):
+        self.SPREADSHEET_ID = id
         creds = None
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
