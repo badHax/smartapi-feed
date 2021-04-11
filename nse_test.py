@@ -41,6 +41,7 @@ def get_symbol(name,instrument='indices'):
 	
 def job():
 	while True:
+		job()
 		get_symbol('NIFTY')
 		get_symbol('BANKNIFTY')
 		get_symbol('RELIANCE','equities')
@@ -49,11 +50,11 @@ def job():
 if(len(sys.argv) < 3):
 	print('useage: nse_test.py interval_in_minutes google_sheet_id')
 else:
-	schedule.every().monday.at('9:00').until('14:30').do(job)
-	schedule.every().tuesday.at('9:00').until('14:30').do(job)
-	schedule.every().wednesday.at('9:00').until('14:30').do(job)
-	schedule.every().thursday.at('9:00').until('14:30').do(job)
-	schedule.every().friday.at('9:00').until('14:30').do(job)
+	schedule.every().monday.at('9:00').until('13:30').do(job)
+	schedule.every().tuesday.at('9:00').until('13:30').do(job)
+	schedule.every().wednesday.at('9:00').until('13:30').do(job)
+	schedule.every().thursday.at('9:00').until('13:30').do(job)
+	schedule.every().friday.at('9:00').until('13:30').do(job)
 		
 	while True:
 		schedule.run_pending()
