@@ -4,21 +4,20 @@ import sys
 import time
 from googleSheetsUtil import GoogleSheetsUtil
 
-api_endpoint = 'https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY'
-webpage = 'https://www.nseindia.com/get-quotes/derivatives?symbol=NIFTY'
+api_endpoint = 'https://www.nseindia.com/api/option-chain-indices'
+webpage = 'https://www.nseindia.com/get-quotes/derivatives'
 
-def job():
-	print("updating sheet")
+def get_symbol(name):
+	print('updating {0} sheet...'.format(name))
 	headers = {'User-Agent': 'python/script'}
+	params = {('symbol',name)}
 	s = requests.session()
-	r1 = s.get(webpage, headers=headers)
-	response = s.get(api_endpoint, headers=headers)
+	r1 = s.get(webpage, headers=headers,params=params)
+	response = s.get(api_endpoint, headers=headers, params=params)
 	
 	if response.status_code == 400:
 		response = s.get(api_endpoint)
-	
 	j = response.json()
-	
 	all_data = []
 	for data in j['filtered']['data']:
 		row_data = [
@@ -36,15 +35,26 @@ def job():
 		all_data.append(row_data)
 			
 	gs = GoogleSheetsUtil(sys.argv[2])
-	gs.add_row_range(all_data, 'NIFTY',2)
+	gs.add_row_range(all_data, name,2)
 	print("next update in {0} minutes".format(sys.argv[1]))
 	
-
+	
+def job():
+	while True:
+		get_symbol('NIFTY')
+		get_symbol('BANKNIFTY')
+		get_symbol('RELIANCE')
+		time.sleep(int(sys.argv[1])*60)
+		
 if(len(sys.argv) < 3):
 	print('useage: nse_test.py interval_in_minutes google_sheet_id')
 else:
-	job()
-	schedule.every(int(sys.argv[1])).minutes.do(job)
+	schedule.every().monday.at('9:00').until('14:30').do(job)
+	schedule.every().tuesday.at('9:00').until('14:30').do(job)
+	schedule.every().wednesday.at('9:00').until('14:30').do(job)
+	schedule.every().thursday.at('9:00').until('14:30').do(job)
+	schedule.every().friday.at('9:00').until('14:30').do(job)
+		
 	while True:
 		schedule.run_pending()
 		time.sleep(1)
