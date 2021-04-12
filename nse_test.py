@@ -10,6 +10,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 api_endpoint = 'https://www.nseindia.com/api/option-chain-'
 webpage = 'https://www.nseindia.com/get-quotes/derivatives'
+timeout = 10
 
 
 def get_symbol(name,instrument='indices'):
@@ -17,11 +18,11 @@ def get_symbol(name,instrument='indices'):
 	headers = {'User-Agent': 'python/script'}
 	params = {('symbol',name)}
 	s = requests.session()
-	r1 = s.get(webpage, headers=headers,params=params)
-	response = s.get(api_endpoint+instrument, headers=headers, params=params)
+	r1 = s.get(webpage, headers=headers,params=params,timeout=timeout)
+	response = s.get(api_endpoint+instrument, headers=headers, params=params,timeout=timeout)
 	
 	if response.status_code == 400:
-		response = s.get(api_endpoint)
+		response = s.get(api_endpoint,timeout=timeout)
 	j = response.json()
 	all_data = []
 	for data in j['filtered']['data']:
