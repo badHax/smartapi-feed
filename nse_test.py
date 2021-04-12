@@ -66,7 +66,7 @@ def job(force=False):
 if(len(sys.argv) < 3):
 	print('useage: nse_test.py interval_in_minutes google_sheet_id')
 else:
-	schedule.every().monday.at('9:00').do(job)
+	schedule.every().monday.at('09:00').do(job)
 	schedule.every().tuesday.at('09:00').do(job)
 	schedule.every().wednesday.at('09:00').do(job)
 	schedule.every().thursday.at('09:00').do(job)
