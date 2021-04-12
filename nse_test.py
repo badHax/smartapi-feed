@@ -5,6 +5,9 @@ import datetime
 import time
 from datetime import timedelta
 from googleSheetsUtil import GoogleSheetsUtil
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 api_endpoint = 'https://www.nseindia.com/api/option-chain-'
 webpage = 'https://www.nseindia.com/get-quotes/derivatives'
