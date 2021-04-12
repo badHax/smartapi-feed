@@ -2,7 +2,7 @@
 NIFTY*.txt
 BANKNIFTY*.txt
 FINNIFTY*.txt
-#secret.json
+secret.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
